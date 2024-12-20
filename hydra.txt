@@ -1,0 +1,57 @@
+九头蛇 v9.5（c）2023 年由 van Hauser/THC 和 David Maciejak - 请不要在军事或特工组织中使用，或用于非法目的（此为非约束性声明，这些***无论如何都会无视法律和道德）。
+
+语法：hydra [[[-l LOGIN|-L FILE] [-p PASS|-P FILE]] | [-C FILE]] [-e nsr] [-o FILE] [-t TASKS] [-M FILE [-T TASKS]] [-w TIME] [-W TIME] [-f] [-s PORT] [-x MIN:MAX:CHARSET] [-c TIME] [-ISOuvVd46] [-m MODULE_OPT] [服务://服务器[:PORT][/OPT]]
+
+选项：
+  -R        恢复之前中断/崩溃的会话
+  -I        忽略现有的恢复文件（不等待 10 秒）
+  -S        执行 SSL 连接
+  -s PORT   如果服务在不同的默认端口上，在此处定义
+  -l LOGIN 或 -L FILE  使用 LOGIN 名称登录，或从 FILE 加载多个登录名
+  -p PASS  或 -P FILE  尝试密码 PASS，或从 FILE 加载多个密码
+  -x MIN:MAX:CHARSET  密码暴力生成，输入“-x -h”获取帮助
+  -y        在暴力破解中禁用符号的使用，见上文
+  -r        对选项 -x 使用非随机的混洗方法
+  -e nsr    尝试“n”空密码、“s”以登录名作为密码和/或“r”反转登录名
+  -u        循环遍历用户，而不是密码（有效！-x 时隐含）
+  -C FILE   冒号分隔的“登录:密码”格式，代替 -L / -P 选项
+  -M FILE   要攻击的服务器列表，每行一个条目，':'指定端口
+  -o FILE   将找到的登录/密码对写入 FILE 而不是标准输出
+  -b FORMAT 指定 -o FILE 的格式：文本（默认）、json、jsonv1
+  -f / -F   当找到登录/密码对时退出（-M：-f 每个主机，-F 全局）
+  -t TASKS  每个目标并行运行 TASKS 数量的连接（默认：16）
+  -T TASKS  总体并行运行 TASKS 个连接（对于 -M，默认：64）
+  -w / -W TIME  等待响应的时间（32）/每个线程之间的连接间隔（0）
+  -c TIME   所有线程中每个登录尝试的等待时间（强制 -t 为 1）
+  -4 / -6   使用 IPv4（默认）/ IPv6 地址（在 -M 中始终放在 [] 中）
+  -v / -V / -d  详细模式/为每次尝试显示登录+密码/调试模式
+  -O        使用旧的 SSL v2 和 v3
+  -K        不重复失败的尝试（对 -M 大规模扫描有好处）
+  -q        不打印关于连接错误的消息
+  -U        服务模块使用详情
+  -m OPT    特定于模块的选项，查看 -U 输出获取信息
+  -h        更多命令行选项（完整帮助）
+  服务器    目标：DNS、IP 或 192.168.0.0/24（这个或 -M 选项）
+  服务    要破解的服务（支持的协议见下文）
+  OPT       某些服务模块支持额外的输入（-U 查看模块帮助）
+
+支持的服务：adam6500 asterisk cisco cisco-enable cobaltstrike cvs firebird ftp[s] http[s]-{head|get|post} http[s]-{get|post}-form http-proxy http-proxy-urlenum icq imap[s] irc ldap2[s] ldap3[-{cram|digest}md5][s] memcached mongodb mssql mysql nntp oracle-listener oracle-sid pcanywhere pcnfs pop3[s] postgres radmin2 rdp redis rexec rlogin rpcap rsh rtsp s7-300 sip smb smtp[s] smtp-enum snmp socks5 ssh sshkey svn teamspeak telnet[s] vmauthd vnc xmpp
+
+九头蛇是一个猜测/破解有效登录/密码对的工具。
+根据 AGPL v3.0 授权。最新版本始终可在以下获取：
+https://github.com/vanhauser-thc/thc-hydra
+请不要在军事或特工组织中使用，或用于非法目的。（这是一个愿望和非约束性声明 - 大多数这样的人无论如何都不在乎法律和道德 - 并告诉自己他们是好人之一。）
+这些服务未编译在内：afp ncp oracle sapr3 smb2.
+
+使用 HYDRA_PROXY_HTTP 或 HYDRA_PROXY 环境变量进行代理设置。
+例如：% export HYDRA_PROXY=socks5://l:p@127.0.0.1:9150 （或：socks4:// connect://）
+     % export HYDRA_PROXY=connect_and_socks_proxylist.txt  （最多 64 个条目）
+     % export HYDRA_PROXY_HTTP=http://login:pass@proxy:8080
+     % export HYDRA_PROXY_HTTP=proxylist.txt  （最多 64 个条目）
+
+示例：
+  hydra -l user -P passlist.txt ftp://192.168.0.1
+  hydra -L userlist.txt -p defaultpw imap://192.168.0.1/PLAIN
+  hydra -C defaults.txt -6 pop3s://[2001:db8::1]:143/TLS:DIGEST-MD5
+  hydra -l admin -p password ftp://[192.168.0.0/24]/
+  hydra -L logins.txt -P pws.txt -M targets.txt ssh 
